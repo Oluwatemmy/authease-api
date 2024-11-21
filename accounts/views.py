@@ -14,31 +14,46 @@ from .serilaizers import (
     SetNewPasswordSerializer, 
     LogoutSerializer,
 )
-
+from django.db import transaction
+from rest_framework.exceptions import APIException
+from rest_framework import exceptions
 
 
 # Create your views here.
 class RegisterUserView(GenericAPIView):
     serializer_class = UserRegisterSerializer
 
+    @transaction.atomic
     def post(self, request):
         user_data = request.data
         serializer = self.serializer_class(data=user_data)
 
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            user = serializer.data
+            try:
+                user = serializer.save()   # Save user to the database
+                
+                # send email function to user['email']
+                try:
+                    send_code_to_user(user.email)  # Pass the user's email address
+                except Exception as e:
+                    transaction.set_rollback(True)
+                    # If email sending fails, raise an exception to rollback the transaction
+                    raise Exception(f"Error sending email: {str(e)}")
 
-            # send email function to user['email']
-            send_code_to_user(user["email"])
+                # If everything is successful, return the response
+                return Response(
+                    {
+                        "data": serializer.data,
+                        "message": f"Hi, {user.first_name}. Thanks for signing up a passcode has been sent ",
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
+            except Exception as e:
+                
+                raise exceptions.ValidationError(
+                    {"message": "An error occurred while saving and sending email. Try again."}
+                )
 
-            return Response(
-                {
-                    "data": user,
-                    "message": f"Hi, {user['first_name']}. Thanks for signing up a passcode has been sent ",
-                },
-                status=status.HTTP_201_CREATED,
-            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

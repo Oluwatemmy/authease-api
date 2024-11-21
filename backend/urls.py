@@ -12,7 +12,7 @@ def home(request):
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Django OAuth System API",
+        title="Auth Ease API",
         default_version='v1',
         description="A ready-to-use Django OAuth system supporting multiple providers, designed for quick integration, enhanced security, and a user-friendly experience.",
         contact=openapi.Contact(email="oluwaseyitemitope456@gmail.com"),

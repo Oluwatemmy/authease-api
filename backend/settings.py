@@ -190,11 +190,38 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
+    # Token Lifetimes
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "AUTH_HEADER_TYPES": ("Bearer",),
-    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+
+    # Token Header Configuration
+    "AUTH_HEADER_TYPES": ("Bearer",),               # Default is "Bearer"
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",       # Ensures proper header lookup
+
+    # Rotation and Blacklisting
+    "ROTATE_REFRESH_TOKENS": False,                  # Issue a new refresh token on each refresh
+    "BLACKLIST_AFTER_ROTATION": True,               # Blacklist the old refresh token after rotation
+
+    # Custom Claims and Validation
+    "ALGORITHM": "HS256",                           # Ensure you're using a secure algorithm
+    "SIGNING_KEY": SECRET_KEY,                      # Use Django's SECRET_KEY or a separate secure key
+    "VERIFYING_KEY": None,                          # Public key for asymmetric algorithms like RS256
+    "AUDIENCE": None,                               # Add audience claim if needed
+    "ISSUER": None,                                 # Add issuer claim if needed
+
+    # Sliding Tokens (Optional)
+    "SLIDING_TOKEN_LIFETIME": timedelta(hours=12),  # For sliding sessions (if used)
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+
+    # Miscellaneous
+    "USER_ID_FIELD": "id",                          # Primary key field for user
+    "USER_ID_CLAIM": "user_id",                     # Claim in the token for user ID
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",               # Claim for identifying token type
+    "JTI_CLAIM": "jti",                             # JWT ID claim for unique identification
 }
+
+PASSWORD_RESET_TIMEOUT = 1800  # Set timeout to 30 minutes (1800 seconds)
 
 GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET")

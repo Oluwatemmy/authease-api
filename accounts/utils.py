@@ -1,9 +1,8 @@
-# We can use a package that actually generates an otp and has an expiration time 
-
 import random
+from django.conf import settings
+from  django.utils import timezone
 from django.core.mail import EmailMessage
 from .models import User, OneTimePassword
-from django.conf import settings
 from django.template.loader import render_to_string
 
 
@@ -24,13 +23,12 @@ def send_code_to_user(email):
             'site_name': site_name,
             'site_url': site_url,
             'otp_code': otp_code,
-            'current_year': '2024',
+            'current_year': timezone.now().year,
         }
 
         # Create HTML content using a template
         email_body = render_to_string('email/verification_email.html', context)
 
-        # email_body = f"Hi {user.first_name}, thanks for signing up on {current_site}. Please verify your email with the \n one time passcode {otp_code}"
         from_name = "Auth Ease"
         from_email = settings.DEFAULT_FROM_EMAIL
 
@@ -48,12 +46,27 @@ def send_code_to_user(email):
         print(f"Error sending email to {email}: {e}")
 
 def send_normal_email(data):
+
+    context = {
+        'user_name': data.get('user_name', 'User'),
+        'reset_link': data['reset_link'],
+        'current_year': timezone.now().year,
+    }
+
+    email_body = render_to_string('email/password_reset_email.html', context)
+
+    from_name = "Auth Ease"
+    from_email = settings.DEFAULT_FROM_EMAIL
+
+    # Set the "From" header with the desired name and email
+    from_address = f"{from_name} <{from_email}>"
+    
     email = EmailMessage(
         subject=data['email_subject'],
-        body=data['email_body'],
-        from_email=settings.DEFAULT_FROM_EMAIL,
+        body=email_body,
+        from_email=from_address,
         to=[data['to_email']]
     )
+
+    email.content_subtype = 'html'  # Ensure the email is sent as HTML
     email.send()
-
-

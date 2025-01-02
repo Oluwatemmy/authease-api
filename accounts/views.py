@@ -146,8 +146,14 @@ class PasswordResetConfirm(GenericAPIView):
             hashed_token = hashlib.sha256(token.encode()).hexdigest()
             
             # Validate the hashed token against the database
-            reset_token = PasswordResetToken.objects.get(user=user)
-            if reset_token.token != hashed_token:
+            try:
+                reset_token = PasswordResetToken.objects.get(user=user)
+                if reset_token.token != hashed_token:
+                    return Response(
+                        {"message": "Password reset link is invalid or has expired and not found. Please request a new one."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            except PasswordResetToken.DoesNotExist:
                 return Response(
                     {"message": "Password reset link is invalid or has expired and not found. Please request a new one."},
                     status=status.HTTP_400_BAD_REQUEST,

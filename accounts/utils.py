@@ -16,8 +16,8 @@ def send_code_to_user(email):
     print(otp_code)
     try:
         user = User.objects.get(email=email)
-        site_url = "https://pypi.org/project/authease/"
-        site_name = "Auth Ease"
+        site_url = settings.SITE_URL
+        site_name = settings.SITE_NAME
         context = {
             'user_name': user.first_name,
             'site_name': site_name,
@@ -29,7 +29,7 @@ def send_code_to_user(email):
         # Create HTML content using a template
         email_body = render_to_string('email/verification_email.html', context)
 
-        from_name = "Auth Ease"
+        from_name = site_name
         from_email = settings.DEFAULT_FROM_EMAIL
 
         # Set the "From" header with the desired name and email
@@ -47,7 +47,9 @@ def send_code_to_user(email):
 
 def send_normal_email(data):
 
+    site_name = settings.SITE_NAME
     context = {
+        'site_name': site_name,
         'user_name': data.get('user_name', 'User'),
         'reset_link': data['reset_link'],
         'current_year': timezone.now().year,
@@ -55,7 +57,7 @@ def send_normal_email(data):
 
     email_body = render_to_string('email/password_reset_email.html', context)
 
-    from_name = "Auth Ease"
+    from_name = site_name
     from_email = settings.DEFAULT_FROM_EMAIL
 
     # Set the "From" header with the desired name and email

@@ -221,6 +221,10 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",                             # JWT ID claim for unique identification
 }
 
+# Specify the site name and URL for email communications and links
+SITE_NAME = 'Auth Ease'
+SITE_URL = 'https://pypi.org/project/authease/'
+
 PASSWORD_RESET_TIMEOUT = 1800  # Set timeout to 30 minutes (1800 seconds)
 
 GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID")
